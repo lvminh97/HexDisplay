@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct Time{
     int day, month, year, hour, minute, second;
@@ -45,33 +46,25 @@ int isValidTime(Time ts){
     return 1;
 }
 
-Time addTime(Time t1, Time t2){
+Time addTime(Time t, int minute){
     Time rs = {0, 0, 0, 0, 0, 0};
-    if(!isValidTime(t1) || !isValidTime(t2))
+    if(!isValidTime(t))
         return rs;
-    rs.year = t1.year + t2.year;
-    rs.month = t1.month + t2.month;
-    rs.day = t1.day + t2.day;
-    rs.hour = t1.hour + t2.hour;
-    rs.minute = t1.minute + t2.minute;
-    rs.second = t1.second + t2.second;
-    if(rs.second > 59){
-        rs.minute += rs.second / 60;
-        rs.second %= 60;
-    }
+    rs.year = t.year;
+    rs.month = t.month;
+    rs.day = t.day;
+    rs.hour = t.hour;
+    rs.minute = t.minute + minute;
+    rs.second = t.second;
     if(rs.minute > 59){
         rs.hour += rs.minute / 60;
         rs.minute %= 60;
     }
-    if(rs.hour > 23){
-        rs.day += rs.hour / 24;
-        rs.hour %= 24;
-    }
-    // if()
+    if((rs.month))
     return rs;
 }
 
-int interval, sample_time; 
+unsigned int interval, sample_time; 
 
 void input(){
     // default value
@@ -84,10 +77,23 @@ void input(){
     scanf("%d", &sample_time);
 }
 
-void generateData(){
-    
+void generateData(char *name){
+    char filename[50];
+    strcpy(filename, name);
+    strcat(filename, "_temperature_data.csv");
+    FILE *file = fopen(filename, "w");
+    Time t = {2021, 8, 16, 0, 0, 0};
+    interval *= 1440;
+    while(interval > sample_time){
+        interval -= sample_time;
+        t = addTime(t, sample_time);
+
+    }
+    fclose(file);
 }
 
 int main(int argc, char* argv[]){
+    srand(time(NULL));
     input();
+
 }
