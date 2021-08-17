@@ -4,8 +4,29 @@
 #include <time.h>
 
 typedef struct Time{
-    int day, month, year, hour, minute, second;
+    unsigned int year, month, day, hour, minute, second;
 } Time;
+
+typedef struct Record{
+    Time time;
+    float temp;
+} Record;
+
+int topOfMonth(int year, int month){
+    switch(month){
+        case 4: case 6: case 9: case 11:
+            return 30;
+        case 2:
+            if((year % 100 != 0 && year % 4 == 0) || year % 400 == 0)
+                return 29;
+            else
+                return 28;
+        case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+            return 31;
+        default:
+            return 0;
+    }
+}
 
 int isValidTime(Time ts){
     // check year is valid
@@ -15,24 +36,8 @@ int isValidTime(Time ts){
     if(ts.month < 1 || ts.month > 12)
         return 0;
     // check day is valid
-    if(ts.day < 1)
+    if(ts.day < 1 || ts.day > topOfMonth(ts.year, ts.month))
         return 0;
-    else{
-        if(ts.month == 4 || ts.month == 6 || ts.month == 9 || ts.month == 11){
-            if(ts.day > 30)
-                return 0;
-        }
-        else if(ts.month == 2){
-            if((ts.year % 100 != 0 && ts.year % 4 == 0) || ts.year % 400 == 0){
-                if(ts.day > 29)
-                    return 0;
-            }
-            else if(ts.day > 28)
-                return 0;
-        } 
-        else if(ts.day > 31)
-            return 0;
-    }
     // check hour
     if(ts.hour < 0 || ts.hour > 23)
         return 0;
@@ -46,7 +51,7 @@ int isValidTime(Time ts){
     return 1;
 }
 
-Time addTime(Time t, int minute){
+Time addTime(Time t, unsigned int minute){
     Time rs = {0, 0, 0, 0, 0, 0};
     if(!isValidTime(t))
         return rs;
@@ -60,40 +65,73 @@ Time addTime(Time t, int minute){
         rs.hour += rs.minute / 60;
         rs.minute %= 60;
     }
-    if((rs.month))
+    if(rs.hour > 23){
+        rs.day += rs.hour / 24;
+        rs.hour %= 24;
+    }
+    while(rs.day > topOfMonth(rs.year, rs.month)){
+        rs.day -= topOfMonth(rs.year, rs.month);
+        rs.month++;
+        if(rs.month > 12){
+            rs.month = 1;
+            rs.year++;
+        }
+    }
     return rs;
 }
 
-unsigned int interval, sample_time; 
+void printTime(Time t){
+    printf("%04d-%02d-%02d %02d:%02d:%02d", t.year, t.month, t.day, t.hour, t.minute, t.second);
+}
 
-void input(){
-    // default value
-    interval = 7;
-    sample_time = 5;
-    // input
+unsigned int interval, sample_time; 
+unsigned int dataLen;
+Record data[30000];
+
+void task1(char *name){
     printf("Nhap khoang thoi gian thuc hien phep do (ngay): ");
     scanf("%d", &interval);
     printf("Nhap chu ky lay mau (phut): ");
     scanf("%d", &sample_time);
-}
-
-void generateData(char *name){
     char filename[50];
-    strcpy(filename, name);
-    strcat(filename, "_temperature_data.csv");
+    sprintf(filename, "%s_temperature_data.csv", name);
     FILE *file = fopen(filename, "w");
     Time t = {2021, 8, 16, 0, 0, 0};
     interval *= 1440;
+    fprintf(file, "time,values\n");
     while(interval > sample_time){
         interval -= sample_time;
         t = addTime(t, sample_time);
-
+        fprintf(file, "%04d-%02d-%02d %02d:%02d:%02d,%.1f\n", t.year, t.month, t.day, t.hour, t.minute, t.second, (rand() % 751 - 125) * 0.2);
     }
+    fclose(file);
+}
+
+void task21(){
+
+}
+
+void task2(char *name){
+    char filename[50];
+    sprintf(filename, "%s_temperature_data.csv", name);
+    FILE *file = fopen(filename, "r");
+    char tmp;
+    while((tmp = fgetc(file)) != '\n');
+    int id = 0;
+    // while()
+    // fscanf(file, "%04d-%02d-%02d %02d:%02d:%02d,%.2f", &data[id].time.year, 
+    //                                                     &data[id].time.month, 
+    //                                                     &data[id].time.day, 
+    //                                                     &data[id].time.hour,
+    //                                                     &data[id].time.minute,
+    //                                                     &data[id].time.second,
+    //                                                     &data[id].temp);
+
     fclose(file);
 }
 
 int main(int argc, char* argv[]){
     srand(time(NULL));
-    input();
-
+    task1(argv[1]);
+    task2(argv[1]);
 }
