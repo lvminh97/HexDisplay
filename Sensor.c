@@ -111,27 +111,33 @@ void task21(){
 
 }
 
+void task22(){
+
+}
+
 void task2(char *name){
     char filename[50];
     sprintf(filename, "%s_temperature_data.csv", name);
     FILE *file = fopen(filename, "r");
-    char tmp;
-    while((tmp = fgetc(file)) != '\n');
+    char tmp[50];
+    fgets(tmp, 50, file);   // get the title line
+    // get data from file
     int id = 0;
-    // while()
-    // fscanf(file, "%04d-%02d-%02d %02d:%02d:%02d,%.2f", &data[id].time.year, 
-    //                                                     &data[id].time.month, 
-    //                                                     &data[id].time.day, 
-    //                                                     &data[id].time.hour,
-    //                                                     &data[id].time.minute,
-    //                                                     &data[id].time.second,
-    //                                                     &data[id].temp);
-
+    while(fgets(tmp, 50, file) != NULL){
+        // fgets(tmp, 50, file);
+        if(tmp[0] == 0)
+            break;
+        sscanf(tmp, "%04d-%02d-%02d %02d:%02d:%02d,%f", &data[id].time.year, &data[id].time.month, &data[id].time.day,
+                                                            &data[id].time.hour, &data[id].time.minute, &data[id].time.second, &data[id].temp);
+        id++;
+    }
+    dataLen = id;
     fclose(file);
+    task21();
 }
 
 int main(int argc, char* argv[]){
     srand(time(NULL));
-    task1(argv[1]);
+    // task1(argv[1]);
     task2(argv[1]);
 }
